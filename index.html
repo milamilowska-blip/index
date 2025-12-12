@@ -53,7 +53,7 @@
     <div id="phase-info">
         <h2 id="current-phase-title">Wprowadzenie</h2>
         <p id="instructions">
-            Instrukcja: **W tej fazie słowo i kolor czcionki ZAWSZE będą zgodne (np. słowo "CZERWONY" jest napisane na czerwono). Twoje zadanie to kliknąć przycisk odpowiadający kolorowi czcionki. Staraj się odpowiadać JAK NAJSZYBCIEJ, czerpiąc z naturalnej zgodności obu informacji**.
+            Instrukcja: **Głównym zadaniem jest kliknięcie przycisku, który odpowiada KOLOROWI CZCIONKI**, ignorując znaczenie słowa. Staraj się odpowiadać **JAK NAJSZYBCIEJ**, jak potrafisz. Test składa się z dwóch faz po 15 sekund.
         </p>
     </div>
     
@@ -124,4 +124,36 @@
             currentColorIndex = newColorIndex;
 
             wordElement.textContent = colors[currentWordIndex].name;
-            wordElement.style.color = colors[currentColorIndex].hex
+            wordElement.style.color = colors[currentColorIndex].hex;
+        }
+
+        // --- Logika przycisków i odpowiedzi ---
+
+        function checkAnswer(chosenColorName) {
+            if (!testRunning || currentPhase < 1 || currentPhase > 2) return;
+
+            const correctColorName = colors[currentColorIndex].name;
+            
+            if (chosenColorName === correctColorName) {
+                if (currentPhase === 1) {
+                    scores.kongruentna++;
+                } else if (currentPhase === 2) {
+                    scores.inkongruentna++;
+                }
+                resultDisplay.textContent = `Poprawnie! Wynik Fazy 1: ${scores.kongruentna}, Fazy 2: ${scores.inkongruentna}`;
+            } else {
+                resultDisplay.textContent = `Błąd. Wynik Fazy 1: ${scores.kongruentna}, Fazy 2: ${scores.inkongruentna}`;
+            }
+
+            generateNewStimulus();
+        }
+
+        function createButtons() {
+            buttonsContainer.innerHTML = '';
+            colors.forEach(color => {
+                const button = document.createElement('button');
+                button.className = 'color-button';
+                button.textContent = color.name;
+                
+                button.style.backgroundColor = color.hex;
+                if (color.name === "ŻÓŁTY" ||
