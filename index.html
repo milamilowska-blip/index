@@ -51,8 +51,8 @@
     <h1>Rozszerzony Dwuczęściowy Test Stroopa</h1>
     
     <div id="phase-info">
-        <h2 id="current-phase-title">Wprowadzenie</h2> <p id="instructions">
-            Instrukcja: **Głównym zadaniem jest kliknięcie przycisku, który odpowiada KOLOROWI CZCIONKI**, ignorując znaczenie słowa. Staraj się odpowiadać **JAK NAJSZYBCIEJ**, jak potrafisz. Test składa się z dwóch faz po 15 sekund.
+        <h2 id="current-phase-title">Gotowość do Testu</h2> <p id="instructions">
+            Instrukcja: Celem testu jest **JAK NAJSZYBSZE** kliknięcie przycisku, który odpowiada **KOLOROWI CZCIONKI**, a nie temu, co jest napisane. Każda faza trwa 15 sekund.
         </p>
     </div>
     
@@ -101,6 +101,7 @@
         // --- Logika generowania słów ---
 
         function generateNewStimulus() {
+            // Generowanie słowa (indeksu)
             let newWordIndex;
             do {
                 newWordIndex = Math.floor(Math.random() * colors.length);
@@ -148,13 +149,15 @@
         }
 
         function createButtons() {
-            buttonsContainer.innerHTML = '';
+            buttonsContainer.innerHTML = ''; // Wyczyść stare przyciski
             colors.forEach(color => {
                 const button = document.createElement('button');
                 button.className = 'color-button';
                 button.textContent = color.name;
                 
+                // Ustawienie stylów przycisków
                 button.style.backgroundColor = color.hex;
+                // Użycie ciemnego tekstu na jasnych tłach
                 if (color.name === "ŻÓŁTY" || color.name === "POMARAŃCZOWY" || color.name === "ZIELONY") {
                      button.style.color = '#333';
                 } else {
@@ -191,33 +194,27 @@
         function startPhaseOne() {
             currentPhase = 1;
             phaseTitle.textContent = 'Faza 1: Kongruentna (Łatwa - 15s)';
-            
-            // ROZWINIĘTA INSTRUKCJA DLA FAZY 1
-            instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą zgodne (np. słowo "CZERWONY" jest na czerwono). Twoje zadanie pozostaje to samo: klikaj kolor czcionki, starając się odpowiadać JAK NAJSZYBCIEJ.';
-            
+            instructionsElement.textContent = 'Instrukcja: Klikaj kolor czcionki. Słowo i kolor są ZGODNE. Staraj się być JAK NAJSZYBSZY.';
             wordElement.style.color = '#333';
             wordElement.textContent = 'FAZA 1 START ZA 3 SEKUNDY...';
             
             setTimeout(() => {
                 generateNewStimulus();
                 runTimer();
-            }, 3000);
+            }, 3000); // 3 sekundy na przygotowanie
         }
 
         function startPhaseTwo() {
             currentPhase = 2;
             phaseTitle.textContent = 'Faza 2: Inkongruentna (Trudna - 15s)';
-            
-            // ROZWINIĘTA INSTRUKCJA DLA FAZY 2
-            instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą niezgodne (np. słowo "CZERWONY" jest na niebiesko). Twoje zadanie się nie zmienia: klikaj kolor czcionki, ignorując znaczenie słowa i starając się odpowiadać JAK NAJSZYBCIEJ.';
-            
+            instructionsElement.textContent = 'Instrukcja: Klikaj kolor czcionki. Słowo i kolor są NIEZGODNE. Staraj się być JAK NAJSZYBSZY.';
             wordElement.style.color = '#333';
             wordElement.textContent = 'FAZA 2 START ZA 3 SEKUNDY...';
             
             setTimeout(() => {
                 generateNewStimulus();
                 runTimer();
-            }, 3000);
+            }, 3000); // 3 sekundy na przygotowanie
         }
         
         function startGame() {
@@ -236,9 +233,10 @@
             
             wordElement.textContent = 'TEST ZAKOŃCZONY!';
             wordElement.style.color = '#333';
-            buttonsContainer.innerHTML = '';
+            buttonsContainer.innerHTML = ''; // Usuń przyciski
             timerElement.classList.add('hidden');
             
+            // Obliczanie różnicy (miernik interferencji)
             const scoreDiff = scores.kongruentna - scores.inkongruentna;
 
             phaseTitle.textContent = 'Końcowe Wyniki';
@@ -258,8 +256,8 @@
 
         // Inicjalizacja
         document.addEventListener('DOMContentLoaded', () => {
-             // Zmieniono, aby używać "Wprowadzenie"
-             phaseTitle.textContent = 'Wprowadzenie'; 
+             // Ustawienie początkowego tytułu
+             phaseTitle.textContent = 'Gotowość do Testu'; 
              wordElement.textContent = 'Kliknij Rozpocznij, aby zacząć rozszerzony Test Stroopa.';
              wordElement.style.color = '#333';
         });
