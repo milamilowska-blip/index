@@ -48,6 +48,14 @@
         .hidden {
             display: none;
         }
+        /* Styl dla nowej stopki */
+        footer {
+            margin-top: 40px;
+            padding: 10px;
+            font-size: 14px;
+            color: #777;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -128,96 +136,4 @@
             wordElement.classList.remove('initial-message');
             
             wordElement.textContent = colors[currentWordIndex].name;
-            wordElement.style.color = colors[currentColorIndex].hex;
-        }
-
-        // --- Logika przycisków i odpowiedzi ---
-
-        function checkAnswer(chosenColorName) {
-            if (!testRunning || currentPhase < 1 || currentPhase > 2) return;
-
-            const correctColorName = colors[currentColorIndex].name;
-            
-            if (chosenColorName === correctColorName) {
-                if (currentPhase === 1) {
-                    scores.kongruentna++;
-                } else if (currentPhase === 2) {
-                    scores.inkongruentna++;
-                }
-                resultDisplay.textContent = `Poprawnie! Wynik Fazy 1: ${scores.kongruentna}, Fazy 2: ${scores.inkongruentna}`;
-            } else {
-                resultDisplay.textContent = `Błąd. Wynik Fazy 1: ${scores.kongruentna}, Fazy 2: ${scores.inkongruentna}`;
-            }
-
-            generateNewStimulus();
-        }
-
-        function createButtons() {
-            buttonsContainer.innerHTML = '';
-            colors.forEach(color => {
-                const button = document.createElement('button');
-                button.className = 'color-button';
-                button.textContent = color.name;
-                
-                button.style.backgroundColor = color.hex;
-                if (color.name === "ŻÓŁTY" || color.name === "POMARAŃCZOWY" || color.name === "ZIELONY") {
-                     button.style.color = '#333';
-                } else {
-                     button.style.color = 'white';
-                }
-                button.onclick = () => checkAnswer(color.name);
-                buttonsContainer.appendChild(button);
-            });
-        }
-
-        // --- Logika faz i czasu ---
-
-        function runTimer() {
-             clearInterval(timerInterval);
-             timeLeft = PHASE_TIME;
-             timerElement.classList.remove('hidden');
-             timeLeftElement.textContent = timeLeft.toFixed(1);
-
-             timerInterval = setInterval(() => {
-                if (timeLeft <= 0.1) {
-                    clearInterval(timerInterval);
-                    if (currentPhase === 1) {
-                        startPhaseTwoInstructions();
-                    } else if (currentPhase === 2) {
-                        endGame();
-                    }
-                } else {
-                    timeLeft -= 0.1;
-                    timeLeftElement.textContent = timeLeft.toFixed(1);
-                }
-             }, 100);
-        }
-
-        // FUNKCJA - Ekran pośredni przed Fazą 1
-        function showPhaseOneInstructions() {
-            resultDisplay.textContent = '';
-            
-            phaseTitle.textContent = 'Faza 1: Kongruentna (Kolor zgodny ze słowem)';
-            instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą zgodne (np. słowo "CZERWONY" jest napisane na czerwono). Twoje zadanie to kliknąć przycisk odpowiadający kolorowi czcionki. Staraj się odpowiadać JAK NAJSZYBCIEJ, czerpiąc z naturalnej zgodności obu informacji.';
-            
-            wordElement.classList.add('initial-message');
-            wordElement.textContent = 'Przeczytaj instrukcję powyżej.';
-            wordElement.style.color = '#333';
-            
-            // GUZIK STARTUJĄCY TEST
-            startButton.textContent = 'ROZPOCZNIJ TEST';
-            startButton.onclick = startGame; 
-
-            buttonsContainer.innerHTML = '';
-        }
-
-        // FUNKCJA - Ekran pośredni przed Fazą 2
-        function startPhaseTwoInstructions() {
-            currentPhase = 2; // Ustawiamy fazę, ale jeszcze nie startujemy zegara
-            
-            resultDisplay.textContent = '';
-            buttonsContainer.innerHTML = ''; // Usuń przyciski odpowiedzi
-
-            phaseTitle.textContent = 'Faza 2: Inkongruentna (Kolor niezgodny ze słowem)';
-            
-            instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą niezgodne (np. słowo "CZERWONY" jest napisane na nie
+            wordElement.style.color = colors[currentColorIndex
