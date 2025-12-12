@@ -19,14 +19,14 @@
             line-height: 100px;
         }
         .color-button {
-            padding: 15px 25px; /* Mniejszy padding dla większej liczby przycisków */
-            font-size: 18px; /* Mniejsza czcionka dla większej liczby przycisków */
+            padding: 15px 25px;
+            font-size: 18px;
             margin: 8px;
             cursor: pointer;
             border: none;
             border-radius: 5px;
             transition: transform 0.1s;
-            width: 140px; /* Stała szerokość */
+            width: 140px;
             box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
         }
         .color-button:active {
@@ -53,7 +53,7 @@
     <div id="phase-info">
         <h2 id="current-phase-title">Faza Oczekiwania</h2>
         <p id="instructions">
-            Celem testu jest **JAK NAJSZYBSZE** kliknięcie przycisku, który odpowiada **KOLOROWI CZCIONKI**, a nie temu, co jest napisane. Każda faza trwa 15 sekund.
+            Instrukcja: Celem testu jest **JAK NAJSZYBSZE** kliknięcie przycisku, który odpowiada **KOLOROWI CZCIONKI**, a nie temu, co jest napisane. Każda faza trwa 15 sekund.
         </p>
     </div>
     
@@ -78,7 +78,7 @@
             { name: "POMARAŃCZOWY", hex: "#E67E22" }
         ];
 
-        const PHASE_TIME = 15; // Zwiększony czas trwania każdej fazy (w sekundach)
+        const PHASE_TIME = 15; // Czas trwania każdej fazy (w sekundach)
         
         let currentPhase = 0; // 0: Oczekiwanie, 1: Kongruentna, 2: Inkongruentna, 3: Koniec
         let currentWordIndex = -1;
@@ -195,7 +195,8 @@
         function startPhaseOne() {
             currentPhase = 1;
             phaseTitle.textContent = 'Faza 1: Kongruentna (Łatwa - 15s)';
-            instructionsElement.textContent = 'Słowo i kolor są ZGODNE. Klikaj kolor czcionki.';
+            // POPRAWIONA INSTRUKCJA
+            instructionsElement.textContent = 'Instrukcja: Klikaj kolor czcionki. Słowo i kolor są ZGODNE. Staraj się być JAK NAJSZYBSZY.';
             wordElement.style.color = '#333';
             wordElement.textContent = 'FAZA 1 START ZA 3 SEKUNDY...';
             
@@ -208,7 +209,8 @@
         function startPhaseTwo() {
             currentPhase = 2;
             phaseTitle.textContent = 'Faza 2: Inkongruentna (Trudna - 15s)';
-            instructionsElement.textContent = 'Słowo i kolor są NIEZGODNE. Klikaj kolor czcionki.';
+            // POPRAWIONA INSTRUKCJA
+            instructionsElement.textContent = 'Instrukcja: Klikaj kolor czcionki. Słowo i kolor są NIEZGODNE. Staraj się być JAK NAJSZYBSZY.';
             wordElement.style.color = '#333';
             wordElement.textContent = 'FAZA 2 START ZA 3 SEKUNDY...';
             
@@ -248,7 +250,7 @@
                 <br>
                 <h3>Wnioski (Efekt Stroopa):</h3>
                 <p>Różnica w poprawnych odpowiedziach (Faza 1 - Faza 2): **${scoreDiff}**.</p>
-                <p>Większość osób osiąga **niższy wynik w Fazie 2**, ponieważ mózg odruchowo czyta słowo, co zakłóca (interferuje z) zadaniem nazwania koloru czcionki. Im większa różnica, tym silniejsza interferencja.</p>
+                <p>Większość osób osiąga **niższy wynik w Fazie 2**, ponieważ mózg odruchowo czyta słowo, co spowalnia (interferuje z) zadaniem nazwania koloru czcionki. Im większa różnica, tym silniejsza interferencja.</p>
             `;
 
             startButton.textContent = 'Spróbuj ponownie';
