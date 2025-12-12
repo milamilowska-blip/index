@@ -1,10 +1,198 @@
-// ... (pozostały kod JS bez zmian)
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rozszerzony Test Stroopa (6 Kolorów)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-color: #f4f4f9;
+        }
+        #stroop-word {
+            font-size: 72px;
+            font-weight: bold;
+            margin: 30px 0;
+            height: 100px;
+            line-height: 100px;
+        }
+        .color-button {
+            padding: 15px 25px;
+            font-size: 18px;
+            margin: 8px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: transform 0.1s;
+            width: 140px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+        .color-button:active {
+            transform: scale(0.98);
+        }
+        #result-display, #phase-info {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        #timer {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Rozszerzony Dwuczęściowy Test Stroopa</h1>
+    
+    <div id="phase-info">
+        <h2 id="current-phase-title">Wprowadzenie</h2> <p id="instructions">
+            Instrukcja: **Głównym zadaniem jest kliknięcie przycisku, który odpowiada KOLOROWI CZCIONKI**, ignorując znaczenie słowa. Staraj się odpowiadać **JAK NAJSZYBCIEJ**, jak potrafisz. Test składa się z dwóch faz po 15 sekund.
+        </p>
+    </div>
+    
+    <button onclick="startGame()" id="start-button">Rozpocznij Test (Faza 1)</button>
+
+    <div id="timer" class="hidden">Czas: <span id="time-left"></span>s</div>
+    
+    <div id="stroop-word"></div>
+
+    <div id="buttons-container"></div>
+
+    <div id="result-display"></div>
+
+    <script>
+        // Rozszerzona lista kolorów (6 kolorów)
+        const colors = [
+            { name: "CZERWONY", hex: "#E74C3C" },
+            { name: "NIEBIESKI", hex: "#3498DB" },
+            { name: "ZIELONY", hex: "#2ECC71" },
+            { name: "ŻÓŁTY", hex: "#F1C40F" },
+            { name: "PURPUROWY", hex: "#9B59B6" },
+            { name: "POMARAŃCZOWY", hex: "#E67E22" }
+        ];
+
+        const PHASE_TIME = 15; // Czas trwania każdej fazy (w sekundach)
+        
+        let currentPhase = 0; // 0: Gotowość, 1: Kongruentna, 2: Inkongruentna, 3: Koniec
+        let currentWordIndex = -1;
+        let currentColorIndex = -1;
+        let scores = { kongruentna: 0, inkongruentna: 0 };
+        let testRunning = false;
+        let timerInterval;
+        let timeLeft;
+        
+        // Elementy DOM
+        const wordElement = document.getElementById('stroop-word');
+        const buttonsContainer = document.getElementById('buttons-container');
+        const resultDisplay = document.getElementById('result-display');
+        const timerElement = document.getElementById('timer');
+        const timeLeftElement = document.getElementById('time-left');
+        const startButton = document.getElementById('start-button');
+        const phaseTitle = document.getElementById('current-phase-title');
+        const instructionsElement = document.getElementById('instructions');
+
+
+        // --- Logika generowania słów ---
+
+        function generateNewStimulus() {
+            let newWordIndex;
+            do {
+                newWordIndex = Math.floor(Math.random() * colors.length);
+            } while (newWordIndex === currentWordIndex);
+            currentWordIndex = newWordIndex;
+
+            let newColorIndex;
+
+            if (currentPhase === 1) {
+                // Faza Kongruentna: Słowo = Kolor
+                newColorIndex = currentWordIndex;
+            } else if (currentPhase === 2) {
+                // Faza Inkongruentna: Słowo != Kolor
+                do {
+                    newColorIndex = Math.floor(Math.random() * colors.length);
+                } while (newColorIndex === currentWordIndex); // Zapewnia niezgodność
+            } else {
+                return;
+            }
+            currentColorIndex = newColorIndex;
+
+            wordElement.textContent = colors[currentWordIndex].name;
+            wordElement.style.color = colors[currentColorIndex].hex;
+        }
+
+        // --- Logika przycisków i odpowiedzi ---
+
+        function checkAnswer(chosenColorName) {
+            if (!testRunning || currentPhase < 1 || currentPhase > 2) return;
+
+            const correctColorName = colors[currentColorIndex].name;
+            
+            if (chosenColorName === correctColorName) {
+                if (currentPhase === 1) {
+                    scores.kongruentna++;
+                } else if (currentPhase === 2) {
+                    scores.inkongruentna++;
+                }
+                resultDisplay.textContent = `Poprawnie! Wynik Fazy 1: ${scores.kongruentna}, Fazy 2: ${scores.inkongruentna}`;
+            } else {
+                resultDisplay.textContent = `Błąd. Wynik Fazy 1: ${scores.kongruentna}, Fazy 2: ${scores.inkongruentna}`;
+            }
+
+            generateNewStimulus();
+        }
+
+        function createButtons() {
+            buttonsContainer.innerHTML = '';
+            colors.forEach(color => {
+                const button = document.createElement('button');
+                button.className = 'color-button';
+                button.textContent = color.name;
+                
+                button.style.backgroundColor = color.hex;
+                if (color.name === "ŻÓŁTY" || color.name === "POMARAŃCZOWY" || color.name === "ZIELONY") {
+                     button.style.color = '#333';
+                } else {
+                     button.style.color = 'white';
+                }
+                button.onclick = () => checkAnswer(color.name);
+                buttonsContainer.appendChild(button);
+            });
+        }
+
+        // --- Logika faz i czasu ---
+
+        function runTimer() {
+             clearInterval(timerInterval);
+             timeLeft = PHASE_TIME;
+             timerElement.classList.remove('hidden');
+             timeLeftElement.textContent = timeLeft.toFixed(1);
+
+             timerInterval = setInterval(() => {
+                if (timeLeft <= 0.1) {
+                    clearInterval(timerInterval);
+                    if (currentPhase === 1) {
+                        startPhaseTwo();
+                    } else if (currentPhase === 2) {
+                        endGame();
+                    }
+                } else {
+                    timeLeft -= 0.1;
+                    timeLeftElement.textContent = timeLeft.toFixed(1);
+                }
+             }, 100);
+        }
 
         function startPhaseOne() {
             currentPhase = 1;
             phaseTitle.textContent = 'Faza 1: Kongruentna (Łatwa - 15s)';
             
-            // ROZWINIĘTA INSTRUKCJA DLA FAZY 1 (KONGGRUENTNEJ)
+            // ROZWINIĘTA INSTRUKCJA DLA FAZY 1
             instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą zgodne (np. słowo "CZERWONY" jest na czerwono). Twoje zadanie pozostaje to samo: klikaj kolor czcionki, starając się odpowiadać JAK NAJSZYBCIEJ.';
             
             wordElement.style.color = '#333';
@@ -13,14 +201,14 @@
             setTimeout(() => {
                 generateNewStimulus();
                 runTimer();
-            }, 3000); // 3 sekundy na przygotowanie
+            }, 3000);
         }
 
         function startPhaseTwo() {
             currentPhase = 2;
             phaseTitle.textContent = 'Faza 2: Inkongruentna (Trudna - 15s)';
             
-            // ROZWINIĘTA INSTRUKCJA DLA FAZY 2 (INKONGRUENTNEJ)
+            // ROZWINIĘTA INSTRUKCJA DLA FAZY 2
             instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą niezgodne (np. słowo "CZERWONY" jest na niebiesko). Twoje zadanie się nie zmienia: klikaj kolor czcionki, ignorując znaczenie słowa i starając się odpowiadać JAK NAJSZYBCIEJ.';
             
             wordElement.style.color = '#333';
@@ -29,7 +217,54 @@
             setTimeout(() => {
                 generateNewStimulus();
                 runTimer();
-            }, 3000); // 3 sekundy na przygotowanie
+            }, 3000);
         }
         
-// ... (pozostały kod JS bez zmian)
+        function startGame() {
+            scores = { kongruentna: 0, inkongruentna: 0 };
+            testRunning = true;
+            startButton.classList.add('hidden');
+            createButtons();
+            resultDisplay.textContent = 'Przygotuj się...';
+            startPhaseOne();
+        }
+        
+        function endGame() {
+            currentPhase = 3;
+            testRunning = false;
+            clearInterval(timerInterval);
+            
+            wordElement.textContent = 'TEST ZAKOŃCZONY!';
+            wordElement.style.color = '#333';
+            buttonsContainer.innerHTML = '';
+            timerElement.classList.add('hidden');
+            
+            const scoreDiff = scores.kongruentna - scores.inkongruentna;
+
+            phaseTitle.textContent = 'Końcowe Wyniki';
+            instructionsElement.innerHTML = `
+                <h3>Wyniki po 15 sekundach w każdej fazie:</h3>
+                <p><strong>Faza 1 (Kongruentna - Łatwa):</strong> ${scores.kongruentna} poprawnych odpowiedzi.</p>
+                <p><strong>Faza 2 (Inkongruentna - Trudna):</strong> ${scores.inkongruentna} poprawnych odpowiedzi.</p>
+                <br>
+                <h3>Wnioski (Efekt Stroopa):</h3>
+                <p>Różnica w poprawnych odpowiedziach (Faza 1 - Faza 2): **${scoreDiff}**.</p>
+                <p>Większość osób osiąga **niższy wynik w Fazie 2**, ponieważ mózg odruchowo czyta słowo, co spowalnia (interferuje z) zadaniem nazwania koloru czcionki. Im większa różnica, tym silniejsza interferencja.</p>
+            `;
+
+            startButton.textContent = 'Spróbuj ponownie';
+            startButton.classList.remove('hidden');
+        }
+
+        // Inicjalizacja
+        document.addEventListener('DOMContentLoaded', () => {
+             // Zmieniono, aby używać "Wprowadzenie"
+             phaseTitle.textContent = 'Wprowadzenie'; 
+             wordElement.textContent = 'Kliknij Rozpocznij, aby zacząć rozszerzony Test Stroopa.';
+             wordElement.style.color = '#333';
+        });
+        
+    </script>
+
+</body>
+</html>
