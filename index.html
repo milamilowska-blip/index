@@ -136,4 +136,214 @@
             wordElement.classList.remove('initial-message');
             
             wordElement.textContent = colors[currentWordIndex].name;
-            wordElement.style.color = colors[currentColorIndex
+            wordElement.style.color = colors[currentColorIndex].hex;
+        }
+
+        // --- Logika przycisków i odpowiedzi ---
+
+        function checkAnswer(chosenColorName) {
+            if (!testRunning || currentPhase < 1 || currentPhase > 2) return;
+
+            const correctColorName = colors[currentColorIndex].name;
+            
+            if (chosenColorName === correctColorName) {
+                if (currentPhase === 1) {
+                    scores.kongruentna++;
+                } else if (currentPhase === 2) {
+                    scores.inkongruentna++;
+                }
+                resultDisplay.textContent = `Poprawnie! Wynik Fazy 1: ${scores.kongruentna}, Fazy 2: ${scores.inkongruentna}`;
+            } else {
+                resultDisplay.textContent = `Błąd. Wynik Fazy 1: ${scores.kongruentna}, Fazy 2: ${scores.inkongruentna}`;
+            }
+
+            generateNewStimulus();
+        }
+
+        function createButtons() {
+            buttonsContainer.innerHTML = '';
+            colors.forEach(color => {
+                const button = document.createElement('button');
+                button.className = 'color-button';
+                button.textContent = color.name;
+                
+                button.style.backgroundColor = color.hex;
+                if (color.name === "ŻÓŁTY" || color.name === "POMARAŃCZOWY" || color.name === "ZIELONY") {
+                     button.style.color = '#333';
+                } else {
+                     button.style.color = 'white';
+                }
+                button.onclick = () => checkAnswer(color.name);
+                buttonsContainer.appendChild(button);
+            });
+        }
+
+        // --- Logika faz i czasu ---
+
+        function runTimer() {
+             clearInterval(timerInterval);
+             timeLeft = PHASE_TIME;
+             timerElement.classList.remove('hidden');
+             timeLeftElement.textContent = timeLeft.toFixed(1);
+
+             timerInterval = setInterval(() => {
+                if (timeLeft <= 0.1) {
+                    clearInterval(timerInterval);
+                    if (currentPhase === 1) {
+                        startPhaseTwoInstructions();
+                    } else if (currentPhase === 2) {
+                        endGame();
+                    }
+                } else {
+                    timeLeft -= 0.1;
+                    timeLeftElement.textContent = timeLeft.toFixed(1);
+                }
+             }, 100);
+        }
+
+        // FUNKCJA - Ekran pośredni przed Fazą 1
+        function showPhaseOneInstructions() {
+            resultDisplay.textContent = '';
+            
+            phaseTitle.textContent = 'Faza 1: Kongruentna (Kolor zgodny ze słowem)';
+            instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą zgodne (np. słowo "CZERWONY" jest napisane na czerwono). Twoje zadanie to kliknąć przycisk odpowiadający kolorowi czcionki. Staraj się odpowiadać JAK NAJSZYBCIEJ, czerpiąc z naturalnej zgodności obu informacji.';
+            
+            wordElement.classList.add('initial-message');
+            wordElement.textContent = 'Przeczytaj instrukcję powyżej.';
+            wordElement.style.color = '#333';
+            
+            // GUZIK STARTUJĄCY TEST
+            startButton.textContent = 'ROZPOCZNIJ TEST';
+            startButton.onclick = startGame; 
+
+            buttonsContainer.innerHTML = '';
+        }
+
+        // FUNKCJA - Ekran pośredni przed Fazą 2
+        function startPhaseTwoInstructions() {
+            currentPhase = 2; // Ustawiamy fazę, ale jeszcze nie startujemy zegara
+            
+            resultDisplay.textContent = '';
+            buttonsContainer.innerHTML = ''; // Usuń przyciski odpowiedzi
+
+            phaseTitle.textContent = 'Faza 2: Inkongruentna (Kolor niezgodny ze słowem)';
+            
+            instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą niezgodne (np. słowo "CZERWONY" jest napisane na niebiesko). To jest tzw. Efekt Stroopa. Twoje zadanie pozostaje to samo: klikaj kolor czcionki, ale tym razem musisz aktywnie ignorować znaczenie słowa, starając się odpowiadać JAK NAJSZYBCIEJ.';
+            
+            wordElement.classList.add('initial-message');
+            wordElement.textContent = 'Gotowy do Fazy 2?';
+            wordElement.style.color = '#333';
+            
+            timerElement.classList.add('hidden'); // Ukryj zegar
+
+            // GUZIK STARTUJĄCY FAZĘ 2
+            startButton.textContent = 'ROZPOCZNIJ FAZĘ 2';
+            startButton.onclick = startPhaseTwo;
+            startButton.classList.remove('hidden');
+        }
+
+
+        // FUNKCJA - Uruchamia Fazy 1 (już bez opóźnienia 3s)
+        function startPhaseOne() {
+            currentPhase = 1;
+            testRunning = true;
+            startButton.classList.add('hidden');
+            createButtons();
+            resultDisplay.textContent = 'Przygotuj się...';
+            
+            // Start licznika i generowanie pierwszego słowa natychmiast
+            generateNewStimulus();
+            runTimer();
+        }
+
+        // FUNKCJA - Uruchamia Fazy 2 (już bez opóźnienia 3s)
+        function startPhaseTwo() {
+            currentPhase = 2;
+            testRunning = true;
+            startButton.classList.add('hidden');
+            createButtons();
+            resultDisplay.textContent = 'Przygotuj się...';
+            
+            // Resetuj styl, żeby słowo było duże
+            wordElement.classList.remove('initial-message');
+
+            // Start licznika i generowanie pierwszego słowa natychmiast
+            generateNewStimulus();
+            runTimer();
+        }
+        
+        // Zmieniona funkcja startGame - teraz służy tylko do przejścia między ekranem instrukcji a startem
+        function startGame() {
+            scores = { kongruentna: 0, inkongruentna: 0 };
+            startPhaseOne();
+        }
+        
+        function endGame() {
+            currentPhase = 3;
+            testRunning = false;
+            clearInterval(timerInterval);
+            
+            wordElement.textContent = 'TEST ZAKOŃCZONY!';
+            wordElement.style.color = '#333';
+            wordElement.classList.remove('initial-message'); 
+            buttonsContainer.innerHTML = '';
+            timerElement.classList.add('hidden');
+            
+            const scoreDiff = scores.kongruentna - scores.inkongruentna;
+
+            phaseTitle.textContent = 'Końcowe Wyniki';
+            instructionsElement.innerHTML = `
+                <h2>Wyniki po 15 sekundach w każdej fazie:</h2>
+                <p><strong>Faza 1 (Kongruentna):</strong> ${scores.kongruentna} poprawnych odpowiedzi.</p>
+                <p><strong>Faza 2 (Inkongruentna):</strong> ${scores.inkongruentna} poprawnych odpowiedzi.</p>
+                <br>
+                <h2>Wnioski (Efekt Stroopa):</h2>
+                <p>Przeprowadzony test <strong>wykazał (w zasadniczej większości przypadków) różnicę</strong> w szybkości i liczbie poprawnych odpowiedzi, co jest właśnie <strong>Efektem Stroopa</strong>. </p>
+                <p>Okazało się, że odpowiedzi w Fazie 2 (Inkongruentnej) były znacząco wolniejsze i/lub zawierały więcej błędów, niż w Fazie 1 (Kongruentnej). Im <strong>większa różnica</strong> (Faza 1 - Faza 2 = <strong>${scoreDiff}</strong>), tym silniejsza interferencja poznawcza, ponieważ mózg musi aktywnie zignorować automatyczny proces czytania słowa.</p>
+                <br>
+                <h2>Czym jest ten test?</h2>
+                <p>Prezentowany test jest <strong>Uproszczoną Wersją Klasycznego Testu Stroopa</strong>. Wersje rozbudowane i standaryzowane, które mierzą czas reakcji i precyzję z dużą dokładnością, są szeroko stosowane w diagnostyce psychologicznej i neurologicznej. Służą one do oceny sprawności procesów poznawczych, szczególnie <strong>Funkcji Wykonawczych (Executive Functions)</strong> mózgu.</p>
+                <p>Test Stroopa jest używany w diagnostyce m.in.:</p>
+                <ul>
+                    <li><strong>Chorób Neurodegeneracyjnych:</strong> Pomaga monitorować lub wykrywać wczesne objawy otępienia (demencji), Choroby Alzheimera lub Parkinsona.</li>
+                    <li><strong>Zespołu Deficytu Uwagi i Nadaktywności (ADHD):</strong> Służy do oceny zdolności do utrzymania koncentracji i hamowania niepożądanych, automatycznych reakcji (samokontrola).</li>
+                    <li><strong>Uszkodzeń Mózgu:</strong> Pomaga określić stopień zaburzenia elastyczności poznawczej i koncentracji po urazach. </li>
+                </ul>
+            `;
+
+            startButton.textContent = 'Spróbuj ponownie';
+            startButton.onclick = showInitialScreen;
+            startButton.classList.remove('hidden');
+        }
+        
+        function showInitialScreen() {
+            currentPhase = 0;
+            phaseTitle.textContent = 'Wprowadzenie';
+            instructionsElement.textContent = 'Zadaniem jest kliknięcie przycisku, który odpowiada KOLOROWI CZCIONKI widocznego słowa. Staraj się odpowiadać JAK NAJSZYBCIEJ, jak potrafisz. Test składa się z dwóch faz po 15 sekund.';
+            
+            wordElement.classList.add('initial-message');
+            wordElement.textContent = 'DALEJ';
+            wordElement.style.color = '#333';
+            
+            startButton.textContent = 'DALEJ';
+            startButton.onclick = showPhaseOneInstructions;
+            startButton.classList.remove('hidden');
+            
+            resultDisplay.textContent = '';
+            buttonsContainer.innerHTML = '';
+        }
+
+
+        // Inicjalizacja
+        document.addEventListener('DOMContentLoaded', () => {
+             showInitialScreen();
+        });
+        
+    </script>
+
+    <footer>
+        K. KARWAŃSKA WSB 2025
+    </footer>
+
+</body>
+</html>
