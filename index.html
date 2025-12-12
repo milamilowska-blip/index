@@ -209,7 +209,7 @@
             instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą zgodne (np. słowo "CZERWONY" jest napisane na czerwono). Twoje zadanie to kliknąć przycisk odpowiadający kolorowi czcionki. Staraj się odpowiadać JAK NAJSZYBCIEJ, czerpiąc z naturalnej zgodności obu informacji.';
             
             wordElement.classList.add('initial-message');
-            wordElement.textContent = 'Przeczytaj instrukcję powyżej.';
+            wordElement.textContent = '';
             wordElement.style.color = '#333';
             
             // GUZIK STARTUJĄCY TEST
@@ -249,7 +249,7 @@
             testRunning = true;
             startButton.classList.add('hidden');
             createButtons();
-            resultDisplay.textContent = 'Przygotuj się...';
+            resultDisplay.textContent = '';
             
             // Start licznika i generowanie pierwszego słowa natychmiast
             generateNewStimulus();
@@ -262,7 +262,7 @@
             testRunning = true;
             startButton.classList.add('hidden');
             createButtons();
-            resultDisplay.textContent = 'Przygotuj się...';
+            resultDisplay.textContent = '';
             
             // Resetuj styl, żeby słowo było duże
             wordElement.classList.remove('initial-message');
