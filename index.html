@@ -12,11 +12,15 @@
             background-color: #f4f4f9;
         }
         #stroop-word {
-            font-size: 72px;
+            font-size: 72px; 
             font-weight: bold;
             margin: 30px 0;
             height: 100px;
             line-height: 100px;
+        }
+        .initial-message {
+            font-size: 32px !important; 
+            font-weight: normal !important;
         }
         .color-button {
             padding: 15px 25px;
@@ -48,7 +52,7 @@
 </head>
 <body>
 
-    <h1>Uproszczony Test Stroopa </h1>
+    <h1>Test Stroopa (Uproszczony)</h1> 
     
     <div id="phase-info">
         <h2 id="current-phase-title">Wprowadzenie</h2>
@@ -57,7 +61,7 @@
         </p>
     </div>
     
-    <button onclick="startGame()" id="start-button">Rozpocznij Test (Faza 1)</button>
+    <button onclick="showPhaseOneInstructions()" id="start-button">DALEJ</button>
 
     <div id="timer" class="hidden">Czas: <span id="time-left"></span>s</div>
     
@@ -80,7 +84,7 @@
 
         const PHASE_TIME = 15; // Czas trwania każdej fazy (w sekundach)
         
-        let currentPhase = 0; // 0: Gotowość, 1: Kongruentna, 2: Inkongruentna, 3: Koniec
+        let currentPhase = 0; 
         let currentWordIndex = -1;
         let currentColorIndex = -1;
         let scores = { kongruentna: 0, inkongruentna: 0 };
@@ -111,18 +115,18 @@
             let newColorIndex;
 
             if (currentPhase === 1) {
-                // Faza Kongruentna: Słowo = Kolor
                 newColorIndex = currentWordIndex;
             } else if (currentPhase === 2) {
-                // Faza Inkongruentna: Słowo != Kolor
                 do {
                     newColorIndex = Math.floor(Math.random() * colors.length);
-                } while (newColorIndex === currentWordIndex); // Zapewnia niezgodność
+                } while (newColorIndex === currentWordIndex);
             } else {
                 return;
             }
             currentColorIndex = newColorIndex;
 
+            wordElement.classList.remove('initial-message');
+            
             wordElement.textContent = colors[currentWordIndex].name;
             wordElement.style.color = colors[currentColorIndex].hex;
         }
@@ -189,14 +193,33 @@
              }, 100);
         }
 
-        function startPhaseOne() {
-            currentPhase = 1;
-            // Nowy nagłówek fazy 1
-            phaseTitle.textContent = 'Faza 1: Kongruentna (Kolor zgodny ze słowem)';
+        // FUNKCJA - Ekran pośredni przed Fazą 1
+        function showPhaseOneInstructions() {
+            resultDisplay.textContent = '';
             
-            // Nowa instrukcja fazy 1
+            phaseTitle.textContent = 'Faza 1: Kongruentna (Kolor zgodny ze słowem)';
             instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą zgodne (np. słowo "CZERWONY" jest napisane na czerwono). Twoje zadanie to kliknąć przycisk odpowiadający kolorowi czcionki. Staraj się odpowiadać JAK NAJSZYBCIEJ, czerpiąc z naturalnej zgodności obu informacji.';
             
+            wordElement.classList.add('initial-message');
+            wordElement.textContent = 'Przeczytaj instrukcję powyżej.';
+            wordElement.style.color = '#333';
+            
+            // ZMIENIONY PRZYCISK: ROZPOCZNIJ TEST
+            startButton.textContent = 'ROZPOCZNIJ TEST';
+            startButton.onclick = startGame; 
+
+            buttonsContainer.innerHTML = '';
+        }
+
+        function startPhaseOne() {
+            currentPhase = 1;
+            
+            wordElement.classList.remove('initial-message');
+            
+            phaseTitle.textContent = 'Faza 1: Kongruentna (Kolor zgodny ze słowem)';
+            instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą zgodne (np. słowo "CZERWONY" jest napisane na czerwono). Twoje zadanie to kliknąć przycisk odpowiadający kolorowi czcionki. Staraj się odpowiadać JAK NAJSZYBCIEJ, czerpiąc z naturalnej zgodności obu informacji.';
+
+
             wordElement.style.color = '#333';
             wordElement.textContent = 'FAZA 1 START ZA 3 SEKUNDY...';
             
@@ -208,10 +231,10 @@
 
         function startPhaseTwo() {
             currentPhase = 2;
-            // Nowy nagłówek fazy 2
             phaseTitle.textContent = 'Faza 2: Inkongruentna (Kolor niezgodny ze słowem)';
             
-            // Nowa instrukcja fazy 2
+            wordElement.classList.remove('initial-message');
+
             instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą niezgodne (np. słowo "CZERWONY" jest napisane na niebiesko). To jest tzw. Efekt Stroopa. Twoje zadanie pozostaje to samo: klikaj kolor czcionki, ale tym razem musisz aktywnie ignorować znaczenie słowa, starając się odpowiadać JAK NAJSZYBCIEJ.';
             
             wordElement.style.color = '#333';
@@ -229,6 +252,7 @@
             startButton.classList.add('hidden');
             createButtons();
             resultDisplay.textContent = 'Przygotuj się...';
+            
             startPhaseOne();
         }
         
@@ -239,6 +263,7 @@
             
             wordElement.textContent = 'TEST ZAKOŃCZONY!';
             wordElement.style.color = '#333';
+            wordElement.classList.remove('initial-message'); 
             buttonsContainer.innerHTML = '';
             timerElement.classList.add('hidden');
             
@@ -255,8 +280,8 @@
                 <p>Okazało się, że odpowiedzi w Fazie 2 (Inkongruentnej) były znacząco wolniejsze i/lub zawierały więcej błędów, niż w Fazie 1 (Kongruentnej). Im **większa różnica** (Faza 1 - Faza 2 = **${scoreDiff}**), tym silniejsza interferencja poznawcza, ponieważ mózg musi aktywnie zignorować automatyczny proces czytania słowa.</p>
                 <br>
                 <h2>Czym jest ten test?</h2>
-                <p>Prezentowany test jest **Uproszczoną, Rozszerzoną Wersją Klasycznego Testu Stroopa**. Wersje rozbudowane i standaryzowane, które mierzą czas reakcji i precyzję z dużą dokładnością, są szeroko stosowane w diagnostyce psychologicznej i neurologicznej. Służą one do oceny sprawności procesów poznawczych, szczególnie **Funkcji Wykonawczych (Executive Functions)** mózgu.</p>
-                <p>Rozbudowany Test Stroopa jest używany w diagnostyce m.in.:</p>
+                <p>Prezentowany test jest **Uproszczoną Wersją Klasycznego Testu Stroopa**. Wersje rozbudowane i standaryzowane, które mierzą czas reakcji i precyzję z dużą dokładnością, są szeroko stosowane w diagnostyce psychologicznej i neurologicznej. Służą one do oceny sprawności procesów poznawczych, szczególnie **Funkcji Wykonawczych (Executive Functions)** mózgu.</p>
+                <p>Test Stroopa jest używany w diagnostyce m.in.:</p>
                 <ul>
                     <li>**Chorób Neurodegeneracyjnych:** Pomaga monitorować lub wykrywać wczesne objawy otępienia (demencji), Choroby Alzheimera lub Parkinsona.</li>
                     <li>**Zespołu Deficytu Uwagi i Nadaktywności (ADHD):** Służy do oceny zdolności do utrzymania koncentracji i hamowania niepożądanych, automatycznych reakcji (samokontrola).</li>
@@ -265,13 +290,32 @@
             `;
 
             startButton.textContent = 'Spróbuj ponownie';
+            startButton.onclick = showInitialScreen;
             startButton.classList.remove('hidden');
         }
+        
+        function showInitialScreen() {
+            currentPhase = 0;
+            phaseTitle.textContent = 'Wprowadzenie';
+            instructionsElement.textContent = 'Zadaniem jest kliknięcie przycisku, który odpowiada KOLOROWI CZCIONKI widocznego słowa. Staraj się odpowiadać JAK NAJSZYBCIEJ, jak potrafisz. Test składa się z dwóch faz po 15 sekund.';
+            
+            wordElement.classList.add('initial-message');
+            // ZMIENIONY KOMUNIKAT NA "DALEJ"
+            wordElement.textContent = 'DALEJ';
+            wordElement.style.color = '#333';
+            
+            startButton.textContent = 'DALEJ';
+            startButton.onclick = showPhaseOneInstructions;
+            startButton.classList.remove('hidden');
+            
+            resultDisplay.textContent = '';
+            buttonsContainer.innerHTML = '';
+        }
+
 
         // Inicjalizacja
         document.addEventListener('DOMContentLoaded', () => {
-             wordElement.textContent = 'Kliknij Rozpocznij, aby zacząć Test.';
-             wordElement.style.color = '#333';
+             showInitialScreen();
         });
         
     </script>
