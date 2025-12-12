@@ -182,7 +182,7 @@
                 if (timeLeft <= 0.1) {
                     clearInterval(timerInterval);
                     if (currentPhase === 1) {
-                        startPhaseTwo();
+                        startPhaseTwoInstructions(); // Przejście do instrukcji Fazy 2
                     } else if (currentPhase === 2) {
                         endGame();
                     }
@@ -204,55 +204,69 @@
             wordElement.textContent = 'Przeczytaj instrukcję powyżej.';
             wordElement.style.color = '#333';
             
-            // ZMIENIONY PRZYCISK: ROZPOCZNIJ TEST
+            // GUZIK STARTUJĄCY TEST
             startButton.textContent = 'ROZPOCZNIJ TEST';
             startButton.onclick = startGame; 
 
             buttonsContainer.innerHTML = '';
         }
 
-        function startPhaseOne() {
-            currentPhase = 1;
+        // FUNKCJA - Ekran pośredni przed Fazą 2 (nowa)
+        function startPhaseTwoInstructions() {
+            currentPhase = 2; // Ustawiamy fazę, ale jeszcze nie startujemy zegara
             
-            wordElement.classList.remove('initial-message');
-            
-            phaseTitle.textContent = 'Faza 1: Kongruentna (Kolor zgodny ze słowem)';
-            instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą zgodne (np. słowo "CZERWONY" jest napisane na czerwono). Twoje zadanie to kliknąć przycisk odpowiadający kolorowi czcionki. Staraj się odpowiadać JAK NAJSZYBCIEJ, czerpiąc z naturalnej zgodności obu informacji.';
+            resultDisplay.textContent = '';
+            buttonsContainer.innerHTML = ''; // Usuń przyciski odpowiedzi
 
-
-            wordElement.style.color = '#333';
-            wordElement.textContent = 'FAZA 1 START ZA 3 SEKUNDY...';
-            
-            setTimeout(() => {
-                generateNewStimulus();
-                runTimer();
-            }, 3000);
-        }
-
-        function startPhaseTwo() {
-            currentPhase = 2;
             phaseTitle.textContent = 'Faza 2: Inkongruentna (Kolor niezgodny ze słowem)';
             
-            wordElement.classList.remove('initial-message');
-
             instructionsElement.textContent = 'W tej fazie słowo i kolor czcionki ZAWSZE będą niezgodne (np. słowo "CZERWONY" jest napisane na niebiesko). To jest tzw. Efekt Stroopa. Twoje zadanie pozostaje to samo: klikaj kolor czcionki, ale tym razem musisz aktywnie ignorować znaczenie słowa, starając się odpowiadać JAK NAJSZYBCIEJ.';
             
+            wordElement.classList.add('initial-message');
+            wordElement.textContent = 'Gotowy do Fazy 2?';
             wordElement.style.color = '#333';
-            wordElement.textContent = 'FAZA 2 START ZA 3 SEKUNDY...';
             
-            setTimeout(() => {
-                generateNewStimulus();
-                runTimer();
-            }, 3000);
+            timerElement.classList.add('hidden'); // Ukryj zegar
+
+            // GUZIK STARTUJĄCY FAZĘ 2
+            startButton.textContent = 'ROZPOCZNIJ FAZĘ 2';
+            startButton.onclick = startPhaseTwo;
+            startButton.classList.remove('hidden');
         }
-        
-        function startGame() {
-            scores = { kongruentna: 0, inkongruentna: 0 };
+
+
+        // FUNKCJA - Uruchamia Fazy 1 (już bez opóźnienia 3s)
+        function startPhaseOne() {
+            currentPhase = 1;
             testRunning = true;
             startButton.classList.add('hidden');
             createButtons();
             resultDisplay.textContent = 'Przygotuj się...';
             
+            // Start licznika i generowanie pierwszego słowa natychmiast
+            generateNewStimulus();
+            runTimer();
+        }
+
+        // FUNKCJA - Uruchamia Fazy 2 (już bez opóźnienia 3s)
+        function startPhaseTwo() {
+            currentPhase = 2;
+            testRunning = true;
+            startButton.classList.add('hidden');
+            createButtons();
+            resultDisplay.textContent = 'Przygotuj się...';
+            
+            // Resetuj styl, żeby słowo było duże
+            wordElement.classList.remove('initial-message');
+
+            // Start licznika i generowanie pierwszego słowa natychmiast
+            generateNewStimulus();
+            runTimer();
+        }
+        
+        // Zmieniona funkcja startGame - teraz służy tylko do przejścia między ekranem instrukcji a startem
+        function startGame() {
+            scores = { kongruentna: 0, inkongruentna: 0 };
             startPhaseOne();
         }
         
